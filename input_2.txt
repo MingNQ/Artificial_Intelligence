@@ -1,0 +1,11 @@
+A K
+A20 B15 C6 D7 E10 F8 G13 H3 I5 K0
+A B C D
+B E
+C E F
+D G H
+E K
+F H K
+G H
+H I
+I K
