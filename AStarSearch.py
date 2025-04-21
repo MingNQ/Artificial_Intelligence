@@ -1,10 +1,5 @@
 import queue
 
-G = {} # A12 : B11 C6 D8 E7
-E = {} # (A, C) : 7
-V = []
-start, end = '', ''
-
 class Node:
     def __init__(self, name, value):
         self.name = name
@@ -15,76 +10,92 @@ class Node:
 
     def __lt__(self, other):
         return self.value <= other.value
+    
+class A_Star:
+    def __init__(self):
+        self.start = None
+        self.end = None
+        self.G = {}
+        self.E = {}
+        self.V = []
 
-def read_file(filename):
-    global start, end, G, E, V
-    with open(filename, 'r', encoding='utf-8') as file:
-        lines = file.readlines()
-        start, end = lines[0].strip().split(' ')
-        v = []
-        for var in lines[1].strip().split(' '):
-            v.append(Node(var[0], int(var[1:])))
-        V = v
-        for node in v:
-            G[node.name] = []
+        self.read_file('input_3.txt')
+        self.search()
 
-        for line in lines[2:]:
-            tmp = line.strip().split(' ')
-            G[tmp[0]].append(tmp[1])
-            E[(tmp[0], tmp[1])] = E.get((tmp[0], tmp[1]), int(tmp[2]))
+    def read_file(self, filename):
+        with open(filename, 'r', encoding='utf-8') as file:
+            lines = file.readlines()
+            self.start, self.end = lines[0].strip().split(' ')
+            for var in lines[1].strip().split(' '):
+                self.V.append(Node(var[0], int(var[1:])))
 
-def find_node(V, start):
-    for v in V:
-        if v.name == start:
-            return v
+            for node in self.V:
+                self.G[node.name] = []
 
-def sort_list(q):
-    nodes = []
-    # Get
-    while q.qsize():
-        nodes.append(q.get())
-    nodes = sorted(nodes)
-    # Put again
-    for node in nodes:
-        q.put(node)
+            for line in lines[2:]:
+                tmp = line.strip().split(' ')
+                self.G[tmp[0]].append(tmp[1])
+                self.E[(tmp[0], tmp[1])] = self.E.get((tmp[0], tmp[1]), int(tmp[2]))
 
-def A_star(G, E, V, start, end):
-    Q = queue.Queue()
-    start_node = find_node(V, start)
-    Q.put(start_node)
-    g = {start:0}
-    parent = {start:None}
+    def search(self):
+        L = []
+        start_node = self.find_node(self.start)
+        L.append(start_node)
+        g = {self.start:0}
+        parent = {self.start:None}
+        print(f"{"TT".ljust(5)} | {"TTK".ljust(5)} | {"k(u, v)".ljust(8)} | {"h(v)".ljust(5)} | {"g(u)".ljust(5)} | {"f(v)".ljust(5)} | {"DSL".ljust(20)}")
 
-    while Q.qsize():
-        current_node = Q.get()
+        while True:
+            if len(L) <= 0:
+                print("ERROR: No path found")
+                return
 
-        if current_node.name == end:
-            print("Min width:", current_node.value)
-            print('Way: ' + '->'.join(min_path(parent, end)))
-            break
+            current_node = L.pop(0)
+            
+            if current_node.name == self.end:
+                print(f"{current_node.name.ljust(5)} | TTKT -> STOP")
+                print('Path: ' + ' -> '.join(self.min_path(parent, self.end)))
+                print("Min width:", current_node.value)
+                return
 
-        next_nodes = G[current_node.name]
-        for node in next_nodes:
-            h = find_node(V, node).value
-            k = E[(current_node.name, node)]
-            g[node] = g[current_node.name] + k
-            f = g[node] + h
-            Q.put(Node(node, f))
-            if node not in parent:
+            next_nodes = self.G[current_node.name]
+            i = 0
+            output = [""] * len(next_nodes)
+            output[i] = f"{current_node.name.ljust(5)} | "
+
+            for node in next_nodes:
+                k = self.E[(current_node.name, node)]
+                h = self.find_node(node).value
+                g[node] = g[current_node.name] + k
+                f = g[node] + h
+                L.append(Node(node, f))
+                output[i] += f"{node.ljust(5)} | {str(k).ljust(8)} | {str(h).ljust(5)} | {str(g[node]).ljust(5)} | {str(f).ljust(5)} | "
+                i += 1
+                
                 parent[node] = current_node.name
 
-        sort_list(Q)
-        print(*Q.queue)
+            L.sort()
+            output[0] += f"{' '.join([str(n) for n in L])}"
+            self.print_state(output)
 
-def min_path(parent, end):
-    path = []
-    current_path = end
-    while current_path is not None:
-        path.append(current_path)
-        current_path = parent[current_path]
-    path.reverse()
-    return path
+    def print_state(self, output):
+        for j in range(1, len(output)):
+            output[j] = ' '.ljust(5) + " | " + output[j]
+        print('\n'.join(output))
+
+    def find_node(self, start):
+        for v in self.V:
+            if v.name == start:
+                return v
+
+    def min_path(self, parent, end):
+        path = []
+        current_path = end
+        while current_path is not None:
+            path.append(current_path)
+            current_path = parent[current_path]
+        path.reverse()
+        return path
 
 if __name__ == '__main__':
-    read_file('input_3.txt')
-    A_star(G, E, V, start, end)
+    A_Star()
