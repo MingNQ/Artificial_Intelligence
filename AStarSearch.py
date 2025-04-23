@@ -18,9 +18,11 @@ class A_Star:
         self.G = {}
         self.E = {}
         self.V = []
+        self.lines = []
 
         self.read_file('input_3.txt')
         self.search()
+        self.write_file()
 
     def read_file(self, filename):
         with open(filename, 'r', encoding='utf-8') as file:
@@ -43,7 +45,9 @@ class A_Star:
         L.append(start_node)
         g = {self.start:0}
         parent = {self.start:None}
-        print(f"{"TT".ljust(5)} | {"TTK".ljust(5)} | {"k(u, v)".ljust(8)} | {"h(v)".ljust(5)} | {"g(u)".ljust(5)} | {"f(v)".ljust(5)} | {"DSL".ljust(20)}")
+        title = f"{"TT".ljust(5)} | {"TTK".ljust(5)} | {"k(u, v)".ljust(8)} | {"h(v)".ljust(5)} | {"g(u)".ljust(5)} | {"f(v)".ljust(5)} | {"DSL".ljust(20)}"
+        print(title)
+        self.lines.append(title + '\n')
 
         while True:
             if len(L) <= 0:
@@ -53,9 +57,12 @@ class A_Star:
             current_node = L.pop(0)
             
             if current_node.name == self.end:
-                print(f"{current_node.name.ljust(5)} | TTKT -> STOP")
-                print('Path: ' + ' -> '.join(self.min_path(parent, self.end)))
-                print("Min width:", current_node.value)
+                ttkt = f"{current_node.name.ljust(5)} | TTKT -> STOP"
+                path = 'Path: ' + ' -> '.join(self.min_path(parent, self.end))
+                min_width = f"Min width: {current_node.value}"
+                
+                self.lines.append(f"{ttkt}\n{path}\n{min_width}\n")
+                print(f"{ttkt}\n{path}\n{min_width}\n")
                 return
 
             next_nodes = self.G[current_node.name]
@@ -78,11 +85,6 @@ class A_Star:
             output[0] += f"{' '.join([str(n) for n in L])}"
             self.print_state(output)
 
-    def print_state(self, output):
-        for j in range(1, len(output)):
-            output[j] = ' '.ljust(5) + " | " + output[j]
-        print('\n'.join(output))
-
     def find_node(self, start):
         for v in self.V:
             if v.name == start:
@@ -96,6 +98,16 @@ class A_Star:
             current_path = parent[current_path]
         path.reverse()
         return path
+
+    def print_state(self, output):
+        for j in range(1, len(output)):
+            output[j] = ' '.ljust(5) + " | " + output[j]
+        print('\n'.join(output))
+        self.lines.append('\n'.join(output) + '\n')
+
+    def write_file(self):
+        with open('output.txt', 'w', encoding='utf-8') as file:
+            file.writelines(self.lines)
 
 if __name__ == '__main__':
     A_Star()
