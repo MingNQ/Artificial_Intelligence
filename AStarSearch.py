@@ -40,9 +40,9 @@ class A_Star:
                 self.E[(tmp[0], tmp[1])] = self.E.get((tmp[0], tmp[1]), int(tmp[2]))
 
     def search(self):
-        L = []
+        L = queue.PriorityQueue()
         start_node = self.find_node(self.start)
-        L.append(start_node)
+        L.put(start_node)
         g = {self.start:0}
         parent = {self.start:None}
         title = f"{"TT".ljust(5)} | {"TTK".ljust(5)} | {"k(u, v)".ljust(8)} | {"h(v)".ljust(5)} | {"g(u)".ljust(5)} | {"f(v)".ljust(5)} | {"DSL".ljust(20)}"
@@ -50,11 +50,11 @@ class A_Star:
         self.lines.append(title + '\n')
 
         while True:
-            if len(L) <= 0:
-                print("ERROR: No path found")
+            if L.qsize() == 0:
+                print("ERROR! No path found")
                 return
 
-            current_node = L.pop(0)
+            current_node = L.get()
             
             if current_node.name == self.end:
                 ttkt = f"{current_node.name.ljust(5)} | TTKT -> STOP"
@@ -67,7 +67,7 @@ class A_Star:
 
             next_nodes = self.G[current_node.name]
             i = 0
-            output = [""] * len(next_nodes)
+            output = [""] * (len(next_nodes) + 1)
             output[i] = f"{current_node.name.ljust(5)} | "
 
             for node in next_nodes:
@@ -75,14 +75,13 @@ class A_Star:
                 h = self.find_node(node).value
                 g[node] = g[current_node.name] + k
                 f = g[node] + h
-                L.append(Node(node, f))
+                L.put(Node(node, f))
                 output[i] += f"{node.ljust(5)} | {str(k).ljust(8)} | {str(h).ljust(5)} | {str(g[node]).ljust(5)} | {str(f).ljust(5)} | "
                 i += 1
                 
                 parent[node] = current_node.name
 
-            L.sort()
-            output[0] += f"{' '.join([str(n) for n in L])}"
+            output[0] += f"{' '.join([str(n) for n in L.queue])}"
             self.print_state(output)
 
     def find_node(self, start):
