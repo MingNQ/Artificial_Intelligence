@@ -6,7 +6,7 @@ class Node:
         self.value = value
 
     def __str__(self):
-        return f'{self.name}{self.value}'
+        return f'{self.name}-{self.value}'
 
     def __lt__(self, other):
         return self.value <= other.value
@@ -29,7 +29,8 @@ class A_Star:
             lines = file.readlines()
             self.start, self.end = lines[0].strip().split(' ')
             for var in lines[1].strip().split(' '):
-                self.V.append(Node(var[0], int(var[1:])))
+                val = var.strip().split('-')
+                self.V.append(Node(val[0], int(val[1])))
 
             for node in self.V:
                 self.G[node.name] = []
